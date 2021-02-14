@@ -1,0 +1,119 @@
+# Get Started!
+
+# Hello there!
+
+# Today, we are going to enjoy some R functions. 
+
+# I am not expecting you to understand *everything* that is going on. We are mostly having a little **fun** before entering into more structured topics from next week.
+
+install.packages(tidyverse)
+install.packages(cowplot)
+
+library(tidyverse)
+library(cowplot)
+library(RColorBrewer)
+
+# creates the variable that stores the activity labels for the expected activities as a vector
+exp_activities <- c("Go to class",
+                    "Do homework",
+                    "Cook and clean",
+                    "Stay in shape",
+                    "Spend time with the family")
+
+# this command, that doesn't have an assignment, shows the output or whatever is assigned to the var.
+exp_activities
+
+# creates the variable that stores the activity labels for the real activities as a vector         
+reality_activities <- c( "Go to class",
+                         "Do homework",
+                         "Cook and clean",
+                         "Stay in shape",
+                         "Play video games",
+                         "Practice guitar")
+                         
+reality_activities
+                
+# time values for expected activities, need to be in order to be mapped correctly                         
+exp_timespent <- c(6, 
+                   14,
+                   15,
+                   5,
+                   10)
+                    
+exp_timespent
+                
+# time values for actual activities, need to be in order to be mapped correctly   
+reality_timespent <- c(10,
+                       20,
+                       15,
+                       6,
+                       10,
+                       10)
+                        
+reality_timespent
+
+# maps the expected activities to the calculated time proportion
+lockdown_exp <- as.data.frame( cbind( exp_activities, exp_timespent/sum(exp_timespent) ))
+
+lockdown_exp
+
+# maps the expected activities to the calculated time proportion
+lockdown_reality <- as.data.frame( cbind( reality_activities, reality_timespent/sum(reality_timespent) ))
+
+lockdown_reality
+
+# this portion sets up the graphs and assigns it to variable to be combined 
+# with the other graph on a canvas
+# aes() defines the data aesthetic representation, e.g. how changes in data show up
+# geom_*() defines the geometric representation of the data
+# theme() defines the color and theme
+# scale_fill_* defines the color gradient for the differences in the data as the values change
+expectations <- 
+ggplot( lockdown_exp, 
+        aes( x = "", y = exp_timespent, fill = exp_activities)) + 
+        geom_bar( stat = "identity", color = "white", size = 1) +
+        coord_polar( "y", start = 0 ) +
+        theme_void() +
+        theme( legend.position = "bottom", legend.title = element_blank(), legend.direction = "vertical",
+        plot.title = element_text(hjust = 0.5, size=15, face="bold"))+
+        scale_fill_brewer(palette="Set1") +
+        ggtitle("Expectation")
+    
+expectations
+
+
+reality <- 
+ggplot( lockdown_reality, 
+        aes( x = "", y = reality_timespent, fill = reality_activities)) + 
+        geom_bar( stat = "identity", color = "white", size = 1) +
+        coord_polar( "y", start = 0 ) +
+        theme_void() +
+        theme( legend.position = "bottom", legend.title = element_blank(), legend.direction = "vertical", 
+        plot.title = element_text(hjust = 0.5, size=15, face="bold"))+
+        scale_fill_brewer(palette="Set1") +
+        ggtitle("Reality")
+
+reality
+
+# this portion combines the previous graphs on to a single canvas
+full_plot <- plot_grid( expectations, reality,
+                        align = "hv")
+# add margins to the canvas to give space for title
+full_plot <- full_plot + theme(plot.margin = margin(50, 0, 50, 0))
+# add title
+full_plot <- full_plot + draw_label("Life During Lockdown", vjust = -10, size = 30, 
+                        fontface = 'bold')
+
+full_plot
+
+
+
+
+
+
+
+
+
+
+
+
