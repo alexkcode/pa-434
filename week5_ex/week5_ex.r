@@ -126,7 +126,7 @@ migrant_5a <-
   distinct(Country, region, refugee_diff)
 
 # Many of the differences seem to result in NAs seemingly because data was not
-# available or collected for earlier years. 
+# available or collected for earlier year (or any of the years). 
 
 # 6. Has there been any changes in the immigration patterns by gender over time? 
 # Which country has the lowest female immigration? 
@@ -220,14 +220,29 @@ refugees_by_year %>%
 
 # Territories and Africa seem to have the most missing data. The countries in these
 # regions may not have the administrative infratstructure to collect such data
-# so it's likely that this missing data is not entirely randomly missing, or MNAR,
+# so it's likely that this missing data is at least randomly missing, or MAR. 
+# Since the data is either missing for all of the years or none of them, it seems 
+# hard to tell if it is more systematic than that.
 
-refugees_by_year %>% 
-  group_by(Country) %>% 
-  summarise(missing = sum(missing)) %>% 
-  filter(missing > 0 & missing < 6)
+migrant_0 %>% 
+  mutate(Migrants_missing = case_when(is.na(Migrants) ~ 1, TRUE ~ 0)) %>% 
+  group_by(Country, region, year) %>% 
+  summarise(missing = sum(Migrants_missing)) %>% 
+  filter(missing > 0)
+
+# In the case of the migrant counts, the countries that lack data lack it specifically
+# in the years leading up to and including 2005, so this could be due to infrastructural
+# issues again or domestic issues. 
+# In Montenegro's case, it wasn't even an independent country until 2006. Similarly,
+# South Sudan was not independent until 2011. So this category is definitively MNAR.
 
 # 3. Write a short wrap-up of what you discovered on missing values. 
 # Note any surprising findings and you think missing values might affect any 
 # analysis contacted with the dataset.
+
+# Some missing values seem to reflect real world events, like with missing migrant
+# counts, while others seem more random, like with refugee data. 
+# What surprised me with the missing values was that the Refugee data would be 
+# missing all of the data for a country or none at all, instead of some random 
+# years being missing. 
 
