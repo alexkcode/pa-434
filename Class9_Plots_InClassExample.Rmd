@@ -1,0 +1,196 @@
+---
+title: "MarkdownNotes"
+author: "FedericaFusi"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    css: bootstrap.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set up the workplace
+
+Upload needed packages
+```{r}
+library(tidyverse)
+library(tidytuesdayR)
+```
+
+Open your data
+```{r}
+tuesdata <- tidytuesdayR::tt_load(2021, week = 2)
+transit_cost <- tuesdata$transit_cost
+```
+
+Have a first look at the data
+```{r}
+transit_cost
+```
+
+Check dimensions
+```{r}
+dim(transit_cost) # 544 rows and 20 columns
+```
+
+# Cleaning
+
+## Variables of interest
+
+I want to look at the relationship between **length of the project** and **real cost**. My scope is to *identify those projects whose cost per km is particularly high or low*.
+
+```{r}
+class(transit_cost$real_cost) #character
+class(transit_cost$length) #numeric
+```
+
+The variable **real_cost** needs to be converted into numeric. I quickly look at it to see potential issues that might arise with the conversation. 
+
+```{r}
+table(transit_cost$real_cost) #There seems to be a few "weird" entry that are character rather than numeric.
+```
+
+I am going to check out these unusual entries by looking at the data
+```{r}
+View(transit_cost)
+```
+
+They seem to be some summary columns left in the dataset by mistake. I will remove them.
+```{r}
+transit_cost2 =
+  transit_cost %>%
+  filter(transit_cost$real_cost != "AVG",
+         transit_cost$real_cost != "MEDIAN",
+         transit_cost$real_cost != "MIN",
+         transit_cost$real_cost != "N",
+         transit_cost$real_cost != "QUARTILE 1",
+         transit_cost$real_cost != "QUARTILE 3",
+         transit_cost$real_cost != "STD")
+
+nrow(transit_cost) - nrow(transit_cost2)
+```
+
+The pipe has correctly eliminated *7 observations*. The new dataset size is `nrow(transit_cost2)`.
+
+I will check again the column to see if there are any other non-numeric data but everything seems fine.
+```{r}
+table(transit_cost2$real_cost)
+```
+
+I will convert the variable into numeric
+```{r}
+transit_cost2$real_cost2 = as.numeric(transit_cost2$real_cost)
+```
+
+Check missing values in both variables
+
+```{r}
+transit_cost2 %>%
+  summarise(sum(is.na(real_cost2)),
+            sum(is.na(length)))
+```
+
+There aren't any, so we are good to start the plot
+
+### A quick note
+
+Note what happens when we convert the original column from the original dataset
+```{r}
+transit_cost$real_cost2 = as.numeric(transit_cost$real_cost)
+```
+
+We get a warning message **Warning message: NAs introduced by coercion**. This a warning message that it is worth checking out. At a minimum you might want to inspect the column manually to see what is going on. 
+
+# My scatterplot
+
+I will start with simple scatterplot to see how observations look like. 
+
+```{r}
+transit_cost2 %>%
+  ggplot() +
+  geom_point(mapping = aes(y = real_cost2, 
+                           x = length)) +
+  xlab("Length of the line in km") +
+  ylab("Total cost in million $") +
+  labs(title = "Correlation between lenght and cost by line")
+```
+
+There are **seven outliers** whose length of the line is greater than 100 km. These outliers reduce our attention on the vast majority of the project so I decided to remove them. I need to remember to report this information in the graph. 
+
+```{r}
+transit_cost2 %>%
+  filter(length <=100) %>% # Eliminate the outliers
+  ggplot() +
+  geom_point(mapping = aes(y = real_cost2, 
+                           x = length)) +
+  xlab("Length of the line in km") +
+  ylab("Total cost in million $") +
+  labs(title = "Correlation between lenght and cost by line",
+       subtitle = "Only projects below 100 km were included")
+```
+
+The graph looks much better now. I want to highlight those projects that are particularly expensive or particularly cheap. I decide to identify them as *being in the top 10 or bottom 10 quantile* considering the cost per km.
+
+```{r}
+transit_cost2 %>%
+  filter(length <= 100) %>%
+  
+# I need to create a new variable identify the ratio cost/length
+mutate(cost_km = real_cost2 / length,
+  
+# I now create a new dummy variable indicating whether the ratio is in the top 10 (=2), bottom ten (=0), or in the average (=1)
+# I categorize them 0,1,2 so that the label will be ordered as low, average, high cost
+         ratio_cost = ifelse(cost_km > quantile(cost_km, 0.90), 2, 
+                             ifelse(cost_km < quantile(cost_km, 0.10), 0, 1))) %>%
+
+# Now I start my plot. Same as before but I add color in the aes function to color my dots based on the new cost variable  
+  ggplot() +
+  geom_point(mapping = aes(y = real_cost2, 
+                           x = length, 
+                           color = as.character(ratio_cost))) + #Remember to change this as.character or as.factor
+  xlab("Length of the line in km") +
+  ylab("Total cost in million $") +
+  labs(title = "Correlation between lenght and cost by line",
+       subtitle = "Only projects below 100 km were included", 
+    # I change the legend label
+       color = "Project cost per km") +
+    # I change the lables of the different category using a scale. Note this is _discrete because I converted the variable into character
+  scale_color_discrete(labels = c("Low cost", "Average cost", "High cost"))
+ 
+```
+
+Since I am pretty satisfied by the skeleton of my scatterplot, I can now change the graphic a bit. I want to change the color to highligh low and high cost projects and I want to add more brakes in my y_axis. 
+
+```{r}
+transit_cost2 %>%
+  filter(length <= 100) %>%
+  
+  mutate(cost_km = real_cost2 / length,
+           ratio_cost = ifelse(cost_km > quantile(cost_km, 0.90), 2, 
+                             ifelse(cost_km < quantile(cost_km, 0.10), 0, 1))) %>%
+  ggplot() +
+  geom_point(mapping = aes(y = real_cost2, 
+                           x = length, 
+                           fill = as.character(ratio_cost),
+                           color = as.character(ratio_cost)), 
+             size = 2, 
+             shape = 21,
+             alpha = 0.5) + 
+  xlab("Length of the line in km") +
+  ylab("Total cost in million $") +
+  labs(title = "Correlation between lenght and cost by line",
+       subtitle = "Only projects below 100 km were included", 
+       color = "Project cost per km") +
+  # Changing color to make
+  scale_fill_manual(values = c("#d62828", "#ced4da", "#003049"),
+                     labels = c("Low cost", "Average cost", "High cost")) +
+  scale_color_manual(values = c("#d62828", "#ced4da", "#003049")) +
+  scale_y_continuous(breaks = seq(0, 30000, by = 5000))
+```
+
+
+
+
+

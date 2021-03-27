@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+devtools::install_github("thebioengineer/tidytuesdayR")
+tuesdata <- tidytuesdayR::tt_load("2020-03-10")
+tuition_cost <- tuesdata$tuition_cost
+diversity_school <- tuesdata$diversity_school
+library(tidyverse)
+```
+
+```{r}
+th <- theme(
+  plot.title = element_text(size = 16, face = "bold"),
+  plot.subtitle = element_text(size = 16, face = "bold"),
+  axis.title = element_text(size = 14),
+  axis.text = element_text(size = 12)
+)
+```
+
+# Heatmap
+
+- Data come from the tuition_cost dataset
+- States should be displayed on the y-axis in alphabetical order (e.g., Arizona should be the first state at the top)
+- School type should be displayed on the x-axis based on in-state tuition cost (e.g., the school type with the lowest in-state tuition should appear first on the left and the school type with the highest in-state tuition should appear last on your right).
+- The different “tiles” (or “squares”) should be colored based on the average in-state tuition cost by state and school type.
+- In a heatmap, colors represent numeric values in a sequential way (e.g., from smaller to larger). As a result, we want colors to run from lighter (smaller values) to darker (higher values). The minimum setting here is to use scale_fill_gradient(low = “white”, high = “blue”) where you manually set the ligher and darker color. The other option is to use a sequential palette.
+
+```{r}
+tuition_cost %>%
+  ggplot(aes(x = type, y = state, fill = in_state_tuition)) + 
+  geom_tile()
+```
+```{r}
+tuition_cost %>%
+  group_by(state, type) %>%
+  mutate(avg_in_state_tuition = mean(in_state_tuition)) %>%
+  ggplot(aes(x = type, y = state, fill = avg_in_state_tuition)) + 
+  geom_tile() +
+  scale_y_discrete()
+```
