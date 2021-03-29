@@ -11,8 +11,12 @@ diversity_school <- tuesdata$diversity_school
 library(tidyverse)
 ```
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi=300,fig.width=7)
+```
+
 ```{r}
-th <- theme(
+th <- theme_minimal() + theme(
   plot.title = element_text(size = 16, face = "bold"),
   plot.subtitle = element_text(size = 16, face = "bold"),
   axis.title = element_text(size = 14),
@@ -20,7 +24,7 @@ th <- theme(
 )
 ```
 
-# Heatmap
+# 1. Heatmap
 
 - Data come from the tuition_cost dataset
 - States should be displayed on the y-axis in alphabetical order (e.g., Arizona should be the first state at the top)
@@ -33,11 +37,101 @@ tuition_cost %>%
   ggplot(aes(x = type, y = state, fill = in_state_tuition)) + 
   geom_tile()
 ```
-```{r}
+```{r, fig.width=14, fig.height=12}
 tuition_cost %>%
   group_by(state, type) %>%
   mutate(avg_in_state_tuition = mean(in_state_tuition)) %>%
   ggplot(aes(x = type, y = state, fill = avg_in_state_tuition)) + 
   geom_tile() +
-  scale_y_discrete()
+  scale_y_discrete() +
+  th
+```
+
+# 2. Lollipop Chart
+
+```{r, fig.width=14, fig.height=12}
+lollipop <-
+  tuition_cost %>%
+  left_join(diversity_school, by = c("name", "state")) %>%
+  filter(state == "Illinois" &
+           degree_length == "4 Year" &
+           category == "Black") %>%
+  filter(total_enrollment > median(total_enrollment, na.rm = TRUE)) %>%
+  mutate(prop_enrollment = enrollment / total_enrollment,
+         name = fct_reorder(as.factor(name), prop_enrollment)) %>%
+  ggplot() +
+  geom_point(aes(x = prop_enrollment, y = name), size = 5) +
+  geom_segment(aes(
+    x = 0,
+    xend = prop_enrollment,
+    y = name,
+    yend = name
+  )) +
+  xlab("Proportion of Total Enrollment") +
+  ylab("University") +
+  scale_x_continuous(labels = scales::percent) + 
+  ggtitle("What proportion of university students are black?") +
+  th
+lollipop
+```
+
+# 3. Cleveland Chart
+
+```{r, fig.width=14, fig.height=12, message=FALSE}
+cleveland <-
+  tuition_cost %>%
+  left_join(diversity_school, by = c("name", "state")) %>%
+  filter(state == "Illinois" & degree_length == "4 Year") %>%
+  mutate(
+    category = fct_collapse(
+      category,
+      "Black" = c("Black"),
+      "Non-Black" = c(
+        "American Indian / Alaska Native",
+        "Asian",
+        "Hispanic",
+        "Native Hawaiian / Pacific Islander",
+        "Two Or More Races",
+        "White",
+        "Unknown"
+      ),
+      other_level = "other"
+    )
+  ) %>% 
+  filter(total_enrollment > median(total_enrollment, na.rm = TRUE) & category != "other") %>%
+  # select(name, category, prop_enrollment) %>%
+  group_by(name, category) %>%
+  summarise(total_enrollment = sum(enrollment)) %>%
+  ggplot(aes(x = total_enrollment, y = name)) +
+  geom_line(aes(group = name)) +
+  geom_point(aes(color = category), size = 3) +
+  xlab("Number of Enrollments") +
+  ylab("University") +
+  ggtitle("How man university students are Black?") +
+  th
+cleveland
+```
+
+```{r, fig.width=14, fig.height=12}
+cleveland <-
+  tuition_cost %>%
+  left_join(diversity_school, by = c("name", "state")) %>%
+  filter(state == "Illinois" & degree_length == "4 Year" & category == "Black") %>%
+  filter(total_enrollment > median(total_enrollment, na.rm = TRUE)) %>%
+  mutate(
+    black = enrollment / total_enrollment,
+    nonblack = 1 - black,
+    name = fct_reorder(as.factor(name), black - nonblack)
+  ) %>% 
+  pivot_longer(c("black","nonblack"), names_to = "race", values_to = "prop_enrollment") %>%
+  # select(name, category, prop_enrollment) %>%
+  ggplot(aes(x = prop_enrollment, y = name)) +
+  geom_line(aes(group = name), size = 1) +
+  geom_point(aes(color = race), size = 5) +
+  xlab("Proportion of Total Enrollment") +
+  ylab("University") +
+  scale_x_continuous(labels = scales::percent) + 
+  ggtitle("What proportion of university students are black?") +
+  th
+cleveland
 ```
