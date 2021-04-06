@@ -1,49 +1,54 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "ASSIGNMENT 10"
+author: "Alexis Kwan"
+subtitle: PA 434
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
-```{r}
-devtools::install_github("thebioengineer/tidytuesdayR")
-tuesdata <- tidytuesdayR::tt_load("2020-03-10")
-tuition_cost <- tuesdata$tuition_cost
-diversity_school <- tuesdata$diversity_school
-library(tidyverse)
+```{r, include=FALSE}
+# devtools::install_github("thebioengineer/tidytuesdayR")
+# install.packages("rcartocolor")
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi=300,fig.width=7)
 ```
 
+```{r, include=FALSE}
+tuesdata <- tidytuesdayR::tt_load("2020-03-10")
+tuition_cost <- tuesdata$tuition_cost
+diversity_school <- tuesdata$diversity_school
+library(tidyverse)
+library(rcartocolor)
+```
+
 ```{r}
 th <- theme_minimal() + theme(
-  plot.title = element_text(size = 16, face = "bold"),
-  plot.subtitle = element_text(size = 16, face = "bold"),
+  plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+  plot.subtitle = element_text(size = 16, face = "italic", hjust = 0.5),
   axis.title = element_text(size = 14),
-  axis.text = element_text(size = 12)
+  axis.text = element_text(size = 14),
+  legend.title = element_text(size = 14),
+  legend.text = element_text(size = 12)
 )
 ```
 
 # 1. Heatmap
 
-- Data come from the tuition_cost dataset
-- States should be displayed on the y-axis in alphabetical order (e.g., Arizona should be the first state at the top)
-- School type should be displayed on the x-axis based on in-state tuition cost (e.g., the school type with the lowest in-state tuition should appear first on the left and the school type with the highest in-state tuition should appear last on your right).
-- The different “tiles” (or “squares”) should be colored based on the average in-state tuition cost by state and school type.
-- In a heatmap, colors represent numeric values in a sequential way (e.g., from smaller to larger). As a result, we want colors to run from lighter (smaller values) to darker (higher values). The minimum setting here is to use scale_fill_gradient(low = “white”, high = “blue”) where you manually set the ligher and darker color. The other option is to use a sequential palette.
-
-```{r}
+```{r, fig.width=14, fig.height=12, message=FALSE}
 tuition_cost %>%
-  ggplot(aes(x = type, y = state, fill = in_state_tuition)) + 
-  geom_tile()
-```
-```{r, fig.width=14, fig.height=12}
-tuition_cost %>%
+  filter(!is.na(state)) %>%
   group_by(state, type) %>%
   mutate(avg_in_state_tuition = mean(in_state_tuition)) %>%
   ggplot(aes(x = type, y = state, fill = avg_in_state_tuition)) + 
   geom_tile() +
-  scale_y_discrete() +
+  labs(title = "Average College Tuition by State",
+       x = "Type of College",
+       y = "State",
+       fill = "Average In-state Tuition") +
+  scale_fill_carto_c(palette = "Emrld", direction = 1) +
   th
 ```
 
@@ -57,81 +62,68 @@ lollipop <-
            degree_length == "4 Year" &
            category == "Black") %>%
   filter(total_enrollment > median(total_enrollment, na.rm = TRUE)) %>%
-  mutate(prop_enrollment = enrollment / total_enrollment,
-         name = fct_reorder(as.factor(name), prop_enrollment)) %>%
+  mutate(
+    prop_enrollment = enrollment / total_enrollment,
+    name = fct_reorder(as.factor(name), prop_enrollment)
+  ) %>%
   ggplot() +
-  geom_point(aes(x = prop_enrollment, y = name), size = 5) +
+  geom_point(aes(x = prop_enrollment, y = name),
+             size = 5,
+             color = "#0072B2") +
   geom_segment(aes(
     x = 0,
     xend = prop_enrollment,
     y = name,
     yend = name
-  )) +
-  xlab("Proportion of Total Enrollment") +
-  ylab("University") +
-  scale_x_continuous(labels = scales::percent) + 
-  ggtitle("What proportion of university students are black?") +
+  ),
+  color = "#0072B2") +
+  geom_text(aes(
+    x = prop_enrollment + 0.05,
+    y = name,
+    label = scales::percent(prop_enrollment, accuracy = 0.01)
+  ),
+  size = 6) +
+  labs(title = "What proportion of university students are black?",
+       x = "Proportion of Total Enrollment",
+       y = "University") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_color_brewer(palette = "Paired") +
   th
 lollipop
 ```
 
 # 3. Cleveland Chart
 
-```{r, fig.width=14, fig.height=12, message=FALSE}
-cleveland <-
-  tuition_cost %>%
-  left_join(diversity_school, by = c("name", "state")) %>%
-  filter(state == "Illinois" & degree_length == "4 Year") %>%
-  mutate(
-    category = fct_collapse(
-      category,
-      "Black" = c("Black"),
-      "Non-Black" = c(
-        "American Indian / Alaska Native",
-        "Asian",
-        "Hispanic",
-        "Native Hawaiian / Pacific Islander",
-        "Two Or More Races",
-        "White",
-        "Unknown"
-      ),
-      other_level = "other"
-    )
-  ) %>% 
-  filter(total_enrollment > median(total_enrollment, na.rm = TRUE) & category != "other") %>%
-  # select(name, category, prop_enrollment) %>%
-  group_by(name, category) %>%
-  summarise(total_enrollment = sum(enrollment)) %>%
-  ggplot(aes(x = total_enrollment, y = name)) +
-  geom_line(aes(group = name)) +
-  geom_point(aes(color = category), size = 3) +
-  xlab("Number of Enrollments") +
-  ylab("University") +
-  ggtitle("How man university students are Black?") +
-  th
-cleveland
-```
-
 ```{r, fig.width=14, fig.height=12}
 cleveland <-
   tuition_cost %>%
   left_join(diversity_school, by = c("name", "state")) %>%
-  filter(state == "Illinois" & degree_length == "4 Year" & category == "Black") %>%
+  filter(state == "Illinois" &
+           degree_length == "4 Year" & 
+           category == "Black") %>%
   filter(total_enrollment > median(total_enrollment, na.rm = TRUE)) %>%
   mutate(
     black = enrollment / total_enrollment,
     nonblack = 1 - black,
     name = fct_reorder(as.factor(name), black - nonblack)
-  ) %>% 
-  pivot_longer(c("black","nonblack"), names_to = "race", values_to = "prop_enrollment") %>%
+  ) %>%
+  pivot_longer(c("black", "nonblack"),
+               names_to = "race",
+               values_to = "prop_enrollment") %>%
+  mutate(race = fct_recode(race,
+                           "Black" = "black",
+                           "Non-Black" = "nonblack")) %>%
   # select(name, category, prop_enrollment) %>%
   ggplot(aes(x = prop_enrollment, y = name)) +
   geom_line(aes(group = name), size = 1) +
   geom_point(aes(color = race), size = 5) +
-  xlab("Proportion of Total Enrollment") +
-  ylab("University") +
+  labs(title = "Proportion of College Students",
+       subtitle = "Black versus Non-Black",
+       x = "Proportion of Total Enrollment",
+       y = "University",
+       color = "Race") +
   scale_x_continuous(labels = scales::percent) + 
-  ggtitle("What proportion of university students are black?") +
+  scale_color_brewer(palette = "Paired", direction = -1) +
   th
 cleveland
 ```

@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(stevedata)
+library(tidyverse)
+data = pwt_sample
+```
+
+```{r}
+data %>%
+  group_by(year) %>%
+  mutate(labsh_R = if_else(labsh < median(labsh, na.rm = T), "low", "high")) %>%
+  select(country, year, labsh, labsh_R)
+```
+
+```{r}
+data %>%
+  group_by(year) %>%
+  mutate(labsh_R = if_else(labsh < median(labsh, na.rm = T), 
+                           "low",
+                           as.character(labsh))) %>%
+  select(country, year, labsh, labsh_R)
+```
+
+Write a for loop that iterates over the numbers 1 to 7 and store the cube of each number in a new vector called "output_cube".
+```{r}
+output_cube <- vector(mode = "numeric", length = 7)
+for (i in 1:7) {
+  output_cube[[i]] <- i**3
+}
+class(output_cube)
+
+output_cube <- c()
+for (i in 1:7) {
+  output_cube[i] <- i**3
+}
+class(output_cube)
+```
+
