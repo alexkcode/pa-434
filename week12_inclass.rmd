@@ -1,0 +1,26 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+triplets <- c('123', 'abc', '1er4', 'ABC', ':-)')
+str_view(triplets, "[0-9]{3}")
+```
+
+Identify words starting with a vowel
+Identify words of more than 4 letters (e.g., words with at least 5 letters)
+Identify a letter followed by a number
+```{r}
+exercise_str = c("banana12", "apple324", "peach1", "bananaaa", "anne", "dog")
+```
+```{r}
+str_view_all(exercise_str, "^[aeiou].*", match = TRUE)
+```
+```{r}
+str_view_all(exercise_str, "[a-z]{5}.*", match = TRUE)
+```
+```{r}
+str_view_all(exercise_str, "[a-z][0-9]", match = TRUE)
+```

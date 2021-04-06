@@ -135,7 +135,6 @@ type = c(
   "article"
 )
 data <- as_tibble(cbind(author, pub, type))
-print(data)
 
 # split into groups based on author
 data.list <- split(data, author)
@@ -144,7 +143,34 @@ data.list <- split(data, author)
 # “Tidy” the data so that each row represents one author only.
 num_pub = vector("numeric", length(data))
 
-for (i in 1:(length(data.list))) {
+
+for (i in 1:(nrow(data))) {
+  data[i, "PubNum"] <- ifelse(i == 1,
+                              1,
+                              ifelse(data[i, "author"] == data[i - 1, "author"],
+                                     data[i - 1, "PubNum"] + 1,
+                                     1))
 }
+print(data)
+
+df_new <- data.frame()
+for (i in 1:(nrow(data))) {
+  pubnum <- ifelse(i == 1,
+                   1,
+                   ifelse(data[i, "author"] == data[i - 1, "author"],
+                          pubnum + 1,
+                          1))
+  authnum <- ifelse(i == 1,
+                    1,
+                    ifelse(data[i, "author"] != data[i - 1, "author"],
+                           authnum + 1,
+                           authnum))
+  df_new[authnum, "author"] <- data[i, "author"]
+  df_new[authnum, str_c(c("pub", as.character(pubnum)), collapse = "")] <-
+    data[i, "pub"]
+  df_new[authnum, str_c(c("type", as.character(pubnum)), collapse = "")] <-
+    data[i, "type"]
+}
+df_new
 ```
 
