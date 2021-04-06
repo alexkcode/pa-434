@@ -1,6 +1,8 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "PA 434 Week11"
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 # 1. Loop
@@ -9,8 +11,8 @@ output: html_notebook
 output_1 <- vector("numeric", 10)
 # since our sequence should be the length of our vector
 # we should make the contruction of our loop based on the length directly
-for (i in seq(length(output))){
-  output[[i]] <- i + 6
+for (i in seq(length(output_1))){
+  output_1[[i]] <- i + 6
 }
 output_1
 ```
@@ -60,9 +62,89 @@ for (col in df) {
 ```{r}
 mat_distributions <- matrix(nrow = 10, ncol = 4)
 means <- c(-10, 0, 10, 100)
+# looping over means and mat_distributions in parallel 
+# with means providing the mean paramenter for the rnorm function
+# to generate columns for mat_distributions
 for (j in seq(ncol(mat_distributions))) {
   mat_distributions[,j] <- rnorm(10, mean = means[j])
 }
 mat_distributions
+```
+
+# 5. Ifelse
+
+```{r}
+respondent.df = data.frame(
+  name = c("Sue", "Eva", "Henry", "Jan", "Mary", "John"),
+  sex = c("f", "f", "m", "m", "f", "m"),
+  years = c(21, 31, 29, 19, 23, 33)
+)
+
+# create new column and assign values based on sex and years columns
+respondent.df$male.teen <-
+  ifelse(test = respondent.df$sex == "m" & respondent.df$years < 20,
+         yes = 1,
+         no = 0)
+respondent.df
+```
+
+# 6. Ifelse versus If_else
+
+```{r, message=FALSE}
+library(tidyverse)
+
+respondent.df %>%
+  mutate(under30 = ifelse(years > 30, NA, years),
+         under30.tidy = if_else(years > 30, as.double(NA), years))
+```
+
+# 7. tapply mean, min and max
+
+```{r}
+for (fun in c("mean", "min", "max")) {
+  # print the name of the function that we iterated to
+  print(fun)
+  # apply function with the name given by variable "fun" across the sexes 
+  print(tapply(X = respondent.df$years, INDEX = respondent.df$sex, FUN = get(fun)))
+}
+```
+
+# 8. Tidy
+
+```{r}
+author = c(
+  "Author1",
+  "Author1",
+  "Author2",
+  "Author3",
+  "Author3",
+  "Author3",
+  "Author4",
+  "Author5"
+)
+pub = c("Pub1", "Pub2", "Pub3", "Pub4",
+        "Pub5", "Pub6", "Pub7", "Pub8")
+type = c(
+  "preprint",
+  "article",
+  "preprint",
+  "article",
+  "article",
+  "preprint",
+  "preprint",
+  "article"
+)
+data <- as_tibble(cbind(author, pub, type))
+print(data)
+
+# split into groups based on author
+data.list <- split(data, author)
+
+# Create a loop that will number the publications for each authors. 
+# “Tidy” the data so that each row represents one author only.
+num_pub = vector("numeric", length(data))
+
+for (i in 1:(length(data.list))) {
+}
 ```
 
