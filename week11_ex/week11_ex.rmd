@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# 1. Loop
+
+```{r}
+output_1 <- vector("numeric", 10)
+# since our sequence should be the length of our vector
+# we should make the contruction of our loop based on the length directly
+for (i in seq(length(output))){
+  output[[i]] <- i + 6
+}
+output_1
+```
+
+# 2. Matrix
+
+```{r}
+mat_x <- matrix(data = 1:120, nrow = 20, ncol = 6)
+```
+
+### a.
+```{r}
+# create the vector to store our output
+output_2a <- vector("numeric", ncol(mat_x))
+# get the number of columns of the matrix and use that as the basis for the length of the loop
+for (j in seq(ncol(mat_x))) {
+  output_2a[[j]] <- sum(mat_x[,j])
+}
+output_2a
+```
+
+### b. 
+```{r}
+# setting margin to 2 tells the apply function to apply the given function on the columns
+output_2b <- apply(X = mat_x, FUN = sum, MARGIN = 2)
+output_2b
+```
+
+# 3. Data Frame
+```{r}
+df <- data.frame(1:10, c(letters[1:10]), rnorm(10, sd = 10), stringsAsFactors = FALSE)
+# iterate over the columns of the df as objects
+# this puts the column in the namespace of each iteration of the loop so that it may be
+# treated a normal variable 
+for (col in df) {
+  if (is.numeric(col)) {
+    print(mean(col))
+  } else if (is.character(col)) {
+    print(length(col))
+  } else {
+    print("column is not numeric or character like")
+  }
+}
+```
+
+# 4. Matrix of Distributions
+```{r}
+mat_distributions <- matrix(nrow = 10, ncol = 4)
+means <- c(-10, 0, 10, 100)
+for (j in seq(ncol(mat_distributions))) {
+  mat_distributions[,j] <- rnorm(10, mean = means[j])
+}
+mat_distributions
+```
+
