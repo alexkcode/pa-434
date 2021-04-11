@@ -1,0 +1,32 @@
+---
+title: "Assignment 12"
+subtitle: "PA 434"
+author: "Alexis Kwan"
+output: html_notebook
+---
+
+```{r include=FALSE}
+library(tidyverse)
+
+class(state.name)
+class(sentences)
+length(state.name)
+length(sentences)
+```
+
+# Part 1
+
+1. Extract the following states: Arizona, California, Illinois, Oregon
+```{r}
+str_extract(state.name, "Arizona|California|Illinois|Oregon")
+```
+
+2. Extract all states that begin with the letter a. Use both str_subset() and str_extract() to see how
+the syntax differs. In both cases, extract the full name of all the states.
+```{r}
+str_subset(state.name, "^[Aa]")
+```
+```{r}
+str_extract(state.name, "^[Aa].*")
+```
+
