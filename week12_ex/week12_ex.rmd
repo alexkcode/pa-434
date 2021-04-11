@@ -29,4 +29,16 @@ str_subset(state.name, "^[Aa]")
 ```{r}
 str_extract(state.name, "^[Aa].*")
 ```
+`str_subset` seems to return only strings that match the patter while `str_extract` returns the strings that match but in the original positions they appear within the data structure, with everything else being `NA`. 
+
+3. Extract all states whose names finish with a OR e.
+```{r}
+str_subset(state.name, "[AaEe]$")
+```
+
+4. Count how many state names are composed of two words (e.g. North Dakota)
+```{r}
+str_subset(state.name, ".* .*")
+sum(str_count(state.name, ".* .*"))
+```
 

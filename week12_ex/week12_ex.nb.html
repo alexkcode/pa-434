@@ -1812,10 +1812,48 @@ summary {
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p><code>str_subset</code> seems to return only strings that match the patter while <code>str_extract</code> returns the strings that match but in the original positions they appear within the data structure, with everything else being <code>NA</code>.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Extract all states whose names finish with a OR e.</li>
+</ol>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyX3N1YnNldChzdGF0ZS5uYW1lLCBcIltBYUVlXSRcIilcbmBgYCJ9 -->
+<pre class="r"><code>str_subset(state.name, &quot;[AaEe]$&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIFsxXSBcIkFsYWJhbWFcIiAgICAgICAgXCJBbGFza2FcIiAgICAgICAgIFwiQXJpem9uYVwiICAgICAgICBcIkNhbGlmb3JuaWFcIiAgICAgXCJEZWxhd2FyZVwiICAgICAgXG4gWzZdIFwiRmxvcmlkYVwiICAgICAgICBcIkdlb3JnaWFcIiAgICAgICAgXCJJbmRpYW5hXCIgICAgICAgIFwiSW93YVwiICAgICAgICAgICBcIkxvdWlzaWFuYVwiICAgICBcblsxMV0gXCJNYWluZVwiICAgICAgICAgIFwiTWlubmVzb3RhXCIgICAgICBcIk1vbnRhbmFcIiAgICAgICAgXCJOZWJyYXNrYVwiICAgICAgIFwiTmV2YWRhXCIgICAgICAgIFxuWzE2XSBcIk5ldyBIYW1wc2hpcmVcIiAgXCJOb3J0aCBDYXJvbGluYVwiIFwiTm9ydGggRGFrb3RhXCIgICBcIk9rbGFob21hXCIgICAgICAgXCJQZW5uc3lsdmFuaWFcIiAgXG5bMjFdIFwiU291dGggQ2Fyb2xpbmFcIiBcIlNvdXRoIERha290YVwiICAgXCJUZW5uZXNzZWVcIiAgICAgIFwiVmlyZ2luaWFcIiAgICAgICBcIldlc3QgVmlyZ2luaWFcIiBcbiJ9 -->
+<pre><code> [1] &quot;Alabama&quot;        &quot;Alaska&quot;         &quot;Arizona&quot;        &quot;California&quot;     &quot;Delaware&quot;      
+ [6] &quot;Florida&quot;        &quot;Georgia&quot;        &quot;Indiana&quot;        &quot;Iowa&quot;           &quot;Louisiana&quot;     
+[11] &quot;Maine&quot;          &quot;Minnesota&quot;      &quot;Montana&quot;        &quot;Nebraska&quot;       &quot;Nevada&quot;        
+[16] &quot;New Hampshire&quot;  &quot;North Carolina&quot; &quot;North Dakota&quot;   &quot;Oklahoma&quot;       &quot;Pennsylvania&quot;  
+[21] &quot;South Carolina&quot; &quot;South Dakota&quot;   &quot;Tennessee&quot;      &quot;Virginia&quot;       &quot;West Virginia&quot; </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ol start="4" style="list-style-type: decimal">
+<li>Count how many state names are composed of two words (e.g. North Dakota)</li>
+</ol>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RyX3N1YnNldChzdGF0ZS5uYW1lLCBcIi4qIC4qXCIpXG5gYGAifQ== -->
+<pre class="r"><code>str_subset(state.name, &quot;.* .*&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiIFsxXSBcIk5ldyBIYW1wc2hpcmVcIiAgXCJOZXcgSmVyc2V5XCIgICAgIFwiTmV3IE1leGljb1wiICAgICBcIk5ldyBZb3JrXCIgICAgICAgXCJOb3J0aCBDYXJvbGluYVwiXG4gWzZdIFwiTm9ydGggRGFrb3RhXCIgICBcIlJob2RlIElzbGFuZFwiICAgXCJTb3V0aCBDYXJvbGluYVwiIFwiU291dGggRGFrb3RhXCIgICBcIldlc3QgVmlyZ2luaWFcIiBcbiJ9 -->
+<pre><code> [1] &quot;New Hampshire&quot;  &quot;New Jersey&quot;     &quot;New Mexico&quot;     &quot;New York&quot;       &quot;North Carolina&quot;
+ [6] &quot;North Dakota&quot;   &quot;Rhode Island&quot;   &quot;South Carolina&quot; &quot;South Dakota&quot;   &quot;West Virginia&quot; </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtKHN0cl9jb3VudChzdGF0ZS5uYW1lLCBcIi4qIC4qXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>sum(str_count(state.name, &quot;.* .*&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEwXG4ifQ== -->
+<pre><code>[1] 10</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxMiIKc3VidGl0bGU6ICJQQSA0MzQiCmF1dGhvcjogIkFsZXhpcyBLd2FuIgpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sKLS0tCgpgYGB7ciBpbmNsdWRlPUZBTFNFfQpsaWJyYXJ5KHRpZHl2ZXJzZSkKCmNsYXNzKHN0YXRlLm5hbWUpCmNsYXNzKHNlbnRlbmNlcykKbGVuZ3RoKHN0YXRlLm5hbWUpCmxlbmd0aChzZW50ZW5jZXMpCmBgYAoKIyBQYXJ0IDEKCjEuIEV4dHJhY3QgdGhlIGZvbGxvd2luZyBzdGF0ZXM6IEFyaXpvbmEsIENhbGlmb3JuaWEsIElsbGlub2lzLCBPcmVnb24KYGBge3J9CnN0cl9leHRyYWN0KHN0YXRlLm5hbWUsICJBcml6b25hfENhbGlmb3JuaWF8SWxsaW5vaXN8T3JlZ29uIikKYGBgCgoyLiBFeHRyYWN0IGFsbCBzdGF0ZXMgdGhhdCBiZWdpbiB3aXRoIHRoZSBsZXR0ZXIgYS4gVXNlIGJvdGggc3RyX3N1YnNldCgpIGFuZCBzdHJfZXh0cmFjdCgpIHRvIHNlZSBob3cKdGhlIHN5bnRheCBkaWZmZXJzLiBJbiBib3RoIGNhc2VzLCBleHRyYWN0IHRoZSBmdWxsIG5hbWUgb2YgYWxsIHRoZSBzdGF0ZXMuCmBgYHtyfQpzdHJfc3Vic2V0KHN0YXRlLm5hbWUsICJeW0FhXSIpCmBgYApgYGB7cn0Kc3RyX2V4dHJhY3Qoc3RhdGUubmFtZSwgIl5bQWFdLioiKQpgYGAKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudCAxMiIKc3VidGl0bGU6ICJQQSA0MzQiCmF1dGhvcjogIkFsZXhpcyBLd2FuIgpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sKLS0tCgpgYGB7ciBpbmNsdWRlPUZBTFNFfQpsaWJyYXJ5KHRpZHl2ZXJzZSkKCmNsYXNzKHN0YXRlLm5hbWUpCmNsYXNzKHNlbnRlbmNlcykKbGVuZ3RoKHN0YXRlLm5hbWUpCmxlbmd0aChzZW50ZW5jZXMpCmBgYAoKIyBQYXJ0IDEKCjEuIEV4dHJhY3QgdGhlIGZvbGxvd2luZyBzdGF0ZXM6IEFyaXpvbmEsIENhbGlmb3JuaWEsIElsbGlub2lzLCBPcmVnb24KYGBge3J9CnN0cl9leHRyYWN0KHN0YXRlLm5hbWUsICJBcml6b25hfENhbGlmb3JuaWF8SWxsaW5vaXN8T3JlZ29uIikKYGBgCgoyLiBFeHRyYWN0IGFsbCBzdGF0ZXMgdGhhdCBiZWdpbiB3aXRoIHRoZSBsZXR0ZXIgYS4gVXNlIGJvdGggc3RyX3N1YnNldCgpIGFuZCBzdHJfZXh0cmFjdCgpIHRvIHNlZSBob3cKdGhlIHN5bnRheCBkaWZmZXJzLiBJbiBib3RoIGNhc2VzLCBleHRyYWN0IHRoZSBmdWxsIG5hbWUgb2YgYWxsIHRoZSBzdGF0ZXMuCmBgYHtyfQpzdHJfc3Vic2V0KHN0YXRlLm5hbWUsICJeW0FhXSIpCmBgYApgYGB7cn0Kc3RyX2V4dHJhY3Qoc3RhdGUubmFtZSwgIl5bQWFdLioiKQpgYGAKYHN0cl9zdWJzZXRgIHNlZW1zIHRvIHJldHVybiBvbmx5IHN0cmluZ3MgdGhhdCBtYXRjaCB0aGUgcGF0dGVyIHdoaWxlIGBzdHJfZXh0cmFjdGAgcmV0dXJucyB0aGUgc3RyaW5ncyB0aGF0IG1hdGNoIGJ1dCBpbiB0aGUgb3JpZ2luYWwgcG9zaXRpb25zIHRoZXkgYXBwZWFyIHdpdGhpbiB0aGUgZGF0YSBzdHJ1Y3R1cmUsIHdpdGggZXZlcnl0aGluZyBlbHNlIGJlaW5nIGBOQWAuIAoKMy4gRXh0cmFjdCBhbGwgc3RhdGVzIHdob3NlIG5hbWVzIGZpbmlzaCB3aXRoIGEgT1IgZS4KYGBge3J9CnN0cl9zdWJzZXQoc3RhdGUubmFtZSwgIltBYUVlXSQiKQpgYGAKCjQuIENvdW50IGhvdyBtYW55IHN0YXRlIG5hbWVzIGFyZSBjb21wb3NlZCBvZiB0d28gd29yZHMgKGUuZy4gTm9ydGggRGFrb3RhKQpgYGB7cn0Kc3RyX3N1YnNldChzdGF0ZS5uYW1lLCAiLiogLioiKQpzdW0oc3RyX2NvdW50KHN0YXRlLm5hbWUsICIuKiAuKiIpKQpgYGAKCg==</div>
 
 
 
